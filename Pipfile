@@ -4,6 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+python-dotenv = "*"
+fastapi = {extras = ["standard"], version = "*"}
+authlib = "*"
+pyjwt = "*"
+requests = "*"
+itsdangerous = "*"
+aiohttp = "*"
+uvicorn = "*"
+gql = "*"
 
 [dev-packages]
 

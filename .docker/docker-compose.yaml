@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: .docker/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - api-gateway-network
+      - crud-network
+
+networks:
+  api-gateway-network:
+
+  crud-network:
+    external: true
