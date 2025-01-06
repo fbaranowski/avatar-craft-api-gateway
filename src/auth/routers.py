@@ -1,9 +1,9 @@
 from authlib.integrations.starlette_client import OAuth
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
-from gql import Client, gql
-from gql.transport.aiohttp import AIOHTTPTransport
 
+from auth.core import create_user
+from auth.dependencies import get_user_payload
 from auth.settings import AuthSettings
 
 router = APIRouter()
@@ -29,28 +29,12 @@ async def login(request: Request):
 async def callback(request: Request):
     token = await oauth.auth0.authorize_access_token(request)
 
-    request.session["user"] = token
+    request.session["id_token"] = token["id_token"]
+
     userinfo = token["userinfo"]
-    email = str(userinfo["email"])
+    email = userinfo["email"]
 
-    transport = AIOHTTPTransport(url=AuthSettings.GRAPHQL_API_URL)
-
-    async with Client(transport=transport, fetch_schema_from_transport=False) as client:
-        query = gql(
-            """
-            mutation ($email: String!) {
-                createUser(email: $email) {
-                    id
-                    mail
-                }
-            }
-            """
-        )
-        variables = {"email": email}
-        try:
-            await client.execute(query, variable_values=variables)
-        except Exception as e:
-            print(f"error {e}")
+    await create_user(email)
 
     return RedirectResponse(url="/profile")
 
@@ -74,15 +58,5 @@ async def public():
 
 
 @router.get("/profile")
-async def profile(request: Request):
-    user = request.session.get("user")
-    userinfo = user["userinfo"]
-    email = userinfo["email"]
-
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="You are not authorized to see this page, please log in",
-        )
-
-    return {"message": "This is your private endpoint", "user": user, "mail": email}
+async def profile(user_payload: dict = Depends(get_user_payload)):
+    return {"message": "This is your private endpoint", "user_info": user_payload}

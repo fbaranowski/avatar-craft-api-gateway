@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from auth.routers import router as auth_router
-from crud.routers import router as crud_router
+from crud.routers.avatars import router as avatars_router
+from crud.routers.users import router as users_router
 from settings import AppSettings
 
 app = FastAPI()
@@ -14,4 +15,5 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(crud_router)
+app.include_router(users_router)
+app.include_router(avatars_router)

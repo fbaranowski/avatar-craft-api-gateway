@@ -2,38 +2,27 @@ import json
 
 import aiohttp
 import jwt
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, Request
 from jwt import algorithms
 
+import auth.exceptions as exceptions
 from auth.settings import AuthSettings
 
 
-async def get_current_user_email(request: Request):
-    user = request.session.get("user")
-    userinfo = user["userinfo"]
-    email = userinfo["email"]
-    return email
-
-
 async def get_user_payload(request: Request):
-    user = request.session.get("user")
+    id_token = request.session.get("id_token", None)
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+    if not id_token:
+        raise exceptions.IDTokenNotFoundException()
 
-    access_token = user.get("access_token", None)
-
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Access token not found")
-
-    header = jwt.get_unverified_header(access_token)
+    header = jwt.get_unverified_header(id_token)
 
     async with aiohttp.ClientSession() as session:
         async with session.get(
             f"https://{AuthSettings.AUTH0_DOMAIN}/.well-known/jwks.json"
         ) as response:
             if response.status != 200:
-                raise HTTPException(status_code=500, detail="Failed to fetch JWKS")
+                raise exceptions.JWKSFetchFailedException()
             jwks = await response.json()
 
     public_key = None
@@ -48,17 +37,22 @@ async def get_user_payload(request: Request):
 
     try:
         payload = jwt.decode(
-            access_token,
+            id_token,
             public_key,
             algorithms=[AuthSettings.AUTH0_ALGORITHM],
-            audience=AuthSettings.AUTH0_AUDIENCE,
+            audience=AuthSettings.AUTH0_CLIENT_ID,
             issuer=AuthSettings.AUTH0_ISSUER,
         )
         return payload
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
+        raise exceptions.ExpiredTokenException()
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise exceptions.InvalidTokenException()
+
+
+async def get_current_user_email(user_payload: dict = Depends(get_user_payload)):
+    email = user_payload.get("email", None)
+    return email
 
 
 def check_admin_role(user_payload: dict = Depends(get_user_payload)):

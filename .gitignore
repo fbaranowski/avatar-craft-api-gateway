@@ -3,3 +3,4 @@ runware_sandbox.py
 .env
 .idea
 __pycache__
+.docker/.env

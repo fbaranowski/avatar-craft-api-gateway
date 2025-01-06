@@ -1,11 +1,5 @@
 import os
 
-from dotenv import find_dotenv, load_dotenv
-
-find_dotenv()
-
-load_dotenv()
-
 
 class AuthSettings:
     AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
