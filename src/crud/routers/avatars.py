@@ -21,7 +21,7 @@ async def avatars(
 
 @router.post("/create")
 async def create_avatar(avatar: CreateAvatar):
-    mutation = Mutation.create_avatar_by_text
+    mutation = Mutation.create_avatar
     variables = {
         "email": avatar.email,
         "aiModel": avatar.ai_model,
@@ -35,7 +35,7 @@ async def create_avatar(avatar: CreateAvatar):
 
 @router.patch("/edit")
 async def edit_avatar(avatar: EditAvatar):
-    mutation = Mutation.create_avatar_by_image
+    mutation = Mutation.edit_avatar
     variables = {
         "email": avatar.email,
         "avatarsUrls": avatar.avatars_urls,

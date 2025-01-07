@@ -29,14 +29,14 @@ async def login(request: Request):
 async def callback(request: Request):
     token = await oauth.auth0.authorize_access_token(request)
 
-    request.session["id_token"] = token["id_token"]
+    request.session["access_token"] = token["access_token"]
 
     userinfo = token["userinfo"]
     email = userinfo["email"]
 
     await create_user(email)
 
-    return RedirectResponse(url="/profile")
+    return RedirectResponse(url="/private")
 
 
 @router.get("/logout")
@@ -57,6 +57,6 @@ async def public():
     }
 
 
-@router.get("/profile")
+@router.get("/private")
 async def profile(user_payload: dict = Depends(get_user_payload)):
     return {"message": "This is your private endpoint", "user_info": user_payload}

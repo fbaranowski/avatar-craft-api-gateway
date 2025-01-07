@@ -10,12 +10,12 @@ from auth.settings import AuthSettings
 
 
 async def get_user_payload(request: Request):
-    id_token = request.session.get("id_token", None)
+    access_token = request.session.get("access_token", None)
 
-    if not id_token:
+    if not access_token:
         raise exceptions.IDTokenNotFoundException()
 
-    header = jwt.get_unverified_header(id_token)
+    header = jwt.get_unverified_header(access_token)
 
     async with aiohttp.ClientSession() as session:
         async with session.get(
@@ -37,10 +37,10 @@ async def get_user_payload(request: Request):
 
     try:
         payload = jwt.decode(
-            id_token,
+            access_token,
             public_key,
             algorithms=[AuthSettings.AUTH0_ALGORITHM],
-            audience=AuthSettings.AUTH0_CLIENT_ID,
+            audience=AuthSettings.AUTH0_AUDIENCE,
             issuer=AuthSettings.AUTH0_ISSUER,
         )
         return payload
@@ -51,7 +51,8 @@ async def get_user_payload(request: Request):
 
 
 async def get_current_user_email(user_payload: dict = Depends(get_user_payload)):
-    email = user_payload.get("email", None)
+    namespace = AuthSettings.AUTH0_NAMESPACE
+    email = user_payload.get(f"{namespace}/email", None)
     return email
 
 
