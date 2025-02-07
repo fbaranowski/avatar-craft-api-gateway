@@ -4,3 +4,5 @@ runware_sandbox.py
 .idea
 __pycache__
 .docker/.env
+ex.py
+img.jpg

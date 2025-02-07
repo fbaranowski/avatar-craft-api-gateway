@@ -2,18 +2,18 @@ import json
 
 import aiohttp
 import jwt
-from fastapi import Depends, Request
+from fastapi import Depends, Header
 from jwt import algorithms
 
 import auth.exceptions as exceptions
 from auth.settings import AuthSettings
 
 
-async def get_user_payload(request: Request):
-    access_token = request.session.get("access_token", None)
+async def get_user_payload(authorization: str = Header(None)) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise exceptions.AccessTokenNotFoundException()
 
-    if not access_token:
-        raise exceptions.IDTokenNotFoundException()
+    access_token = authorization.split("Bearer ")[1]
 
     header = jwt.get_unverified_header(access_token)
 
@@ -50,13 +50,13 @@ async def get_user_payload(request: Request):
         raise exceptions.InvalidTokenException()
 
 
-async def get_current_user_email(user_payload: dict = Depends(get_user_payload)):
+async def get_current_user_email(user_payload: dict = Depends(get_user_payload)) -> str:
     namespace = AuthSettings.AUTH0_NAMESPACE
-    email = user_payload.get(f"{namespace}/email", None)
+    email = user_payload.get(f"{namespace}/email")
     return email
 
 
-def check_admin_role(user_payload: dict = Depends(get_user_payload)):
+def check_admin_role(user_payload: dict = Depends(get_user_payload)) -> bool:
     namespace = AuthSettings.AUTH0_NAMESPACE
     roles = user_payload.get(f"{namespace}/roles", [])
 

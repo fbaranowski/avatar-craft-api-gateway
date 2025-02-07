@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 
 
-class IDTokenNotFoundException(HTTPException):
+class AccessTokenNotFoundException(HTTPException):
     def __init__(self):
-        super().__init__(status_code=401, detail="ID token not found")
+        super().__init__(status_code=401, detail="Access token not found")
 
 
 class JWKSFetchFailedException(HTTPException):

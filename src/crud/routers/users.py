@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from auth.dependencies import check_admin_role, get_current_user_email
 from crud.core import execute_query
