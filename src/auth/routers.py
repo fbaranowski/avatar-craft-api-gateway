@@ -1,6 +1,6 @@
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from auth.core import create_user
 from auth.dependencies import get_user_payload
@@ -36,7 +36,9 @@ async def callback(request: Request):
 
     await create_user(email)
 
-    return RedirectResponse(url="/private")
+    return JSONResponse(
+        content={"access_token": token["access_token"], "token_type": "Bearer"}
+    )
 
 
 @router.get("/logout")
@@ -58,5 +60,9 @@ async def public():
 
 
 @router.get("/private")
-async def profile(user_payload: dict = Depends(get_user_payload)):
-    return {"message": "This is your private endpoint", "user_info": user_payload}
+async def profile(request: Request, user_payload: dict = Depends(get_user_payload)):
+    return {
+        "message": "This is your private endpoint",
+        "user_info": user_payload,
+        "access_token": request.session["access_token"],
+    }

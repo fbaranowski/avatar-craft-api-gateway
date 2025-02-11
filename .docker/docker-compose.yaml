@@ -11,8 +11,13 @@ services:
     networks:
       - api-gateway-network
       - crud-network
+      - sharing-network
 
 networks:
   api-gateway-network:
 
   crud-network:
+    external: true
+
+  sharing-network:
+    external: true

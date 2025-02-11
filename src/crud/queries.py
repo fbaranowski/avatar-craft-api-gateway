@@ -7,7 +7,7 @@ class Query:
                 avatars {
                     id
                     name
-                    url
+                    uuid
                     type
                 }
             }
@@ -15,14 +15,20 @@ class Query:
     """
 
     avatars = """
-        query ($email: String!, $avatar_id: Int, $avatar_type: String) {
-            avatars(email: $email, avatarId: $avatar_id, avatarType: $avatar_type) {
+        query ($email: String!, $avatar_id: Int, $avatar_type: String, $shared_to_email: String, $shared_from_email: String) {
+            avatars(email: $email, avatarId: $avatar_id, avatarType: $avatar_type, sharedToEmail: $shared_to_email, sharedFromEmail: $shared_from_email) {
                 id
+                uuid
                 name
-                url
                 type
             }  
         } 
+    """
+
+    download_avatar = """
+        query ($email: String!, $avatar_uuid: String!, $shared_to_email: String, $shared_from_email: String) {
+            downloadAvatar(email: $email, avatarUuid: $avatar_uuid, sharedToEmail: $shared_to_email, sharedFromEmail: $shared_from_email)
+        }
     """
 
 
@@ -31,19 +37,8 @@ class Mutation:
         mutation ($email: String!, $aiModel: String!, $prompt: String!) {
             createAvatar(email: $email, aiModel: $aiModel, prompt: $prompt) {
                 id
+                uuid
                 name
-                url
-                type
-            }
-        }
-    """
-
-    edit_avatar = """
-        mutation ($email: String!, $avatarsUrls: [String!]!, $aiModel: String!, $prompt: String!) {
-            editAvatar(email: $email, avatarsUrls: $avatarsUrls, aiModel: $aiModel, prompt: $prompt) {
-                id
-                name
-                url
                 type
             }
         }

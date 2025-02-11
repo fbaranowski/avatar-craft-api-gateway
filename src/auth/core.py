@@ -8,7 +8,7 @@ from crud.exceptions import GraphQLQueryException
 transport = AIOHTTPTransport(url=AuthSettings.GRAPHQL_API_URL)
 
 
-async def create_user(email):
+async def create_user(email: str) -> None:
     async with Client(transport=transport, fetch_schema_from_transport=False) as client:
         query = gql(
             """
