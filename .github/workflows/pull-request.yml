@@ -1,9 +1,10 @@
 name: CI Pull Request
 on:
   pull_request
-
 jobs:
   lint:
+    runs-on: ubuntu-latest
     name: Lint
-    uses: astral-sh/ruff-action@v3
-    run: ruff check src
+    steps:
+      - uses: astral-sh/ruff-action@v3
+      - run: ruff check src
