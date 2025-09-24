@@ -3,7 +3,6 @@ import json
 import aiohttp
 import jwt
 from fastapi import Depends, Header
-from jwt import algorithms
 
 import auth.exceptions as exceptions
 from auth.settings import AuthSettings
